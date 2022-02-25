@@ -1,5 +1,6 @@
 package com.network.apispringcourse.domain;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -11,18 +12,24 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.network.apispringcourse.enums.Role;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity(name = "user")
-public class User {
+public class User implements Serializable{
 	
+	private static final long serialVersionUID = 1L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -33,6 +40,8 @@ public class User {
 	@Column(length = 75, nullable = false, unique = true)
 	private String email;
 	
+	@Getter(onMethod = @__({@JsonIgnore}))
+	@Setter(onMethod = @__({@JsonProperty}))
 	@Column(length = 100, nullable = false)
 	private String password;
 	
@@ -40,10 +49,12 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	private Role role;
 	
-	@OneToMany(mappedBy = "user")
+	@Getter(onMethod = @__({@JsonIgnore}))
+	@OneToMany(mappedBy = "owner")
 	private List<Request> requests;
 	
-	@OneToMany(mappedBy = "user")
+	@Getter(onMethod = @__({@JsonIgnore}))
+	@OneToMany(mappedBy = "owner")
 	private List<RequestStage> stages;
 
 }

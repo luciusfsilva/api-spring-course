@@ -2,5 +2,5 @@ package com.network.apispringcourse.enums;
 
 public enum Role {
 	ADMINISTRATOR, 
-	AGENT
+	SIMPLE
 }
