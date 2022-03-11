@@ -4,10 +4,17 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import com.network.apispringcourse.domain.Request;
 import com.network.apispringcourse.enums.RequestState;
+import com.network.apispringcourse.exception.NotFoundException;
+import com.network.apispringcourse.model.PageModel;
+import com.network.apispringcourse.model.PageRequestModel;
 import com.network.apispringcourse.repository.RequestRepository;
 
 @Service
@@ -31,6 +38,9 @@ public class RequestService {
 	
 	public Request getById(Long id) {
 		Request result = repository.findById(id).get();
+		if (ObjectUtils.isEmpty(result)) {
+			new NotFoundException("There are not request with id = " + id);
+		}
 		return result;
 	}
 	
@@ -44,4 +54,21 @@ public class RequestService {
 		return requests;
 	}
 	
+	public PageModel<Request> listAllOnLazyMode(Long ownerId, PageRequestModel pr){
+		Pageable pageable = PageRequest.of(pr.getPage(), pr.getSize());
+		Page<Request> page = repository.findAllByOwnerId(ownerId, pageable);
+		
+		PageModel<Request> pm = new PageModel<>((int)page.getTotalElements(), page.getSize(), page.getTotalPages(), page.getContent());
+	
+		return pm;
+	}
+	
+	public PageModel<Request> listAllOnLazyMode(PageRequestModel pr){
+		Pageable pageable = PageRequest.of(pr.getPage(), pr.getSize());
+		Page<Request> page = repository.findAll(pageable);
+		
+		PageModel<Request> pm = new PageModel<>((int)page.getTotalElements(), page.getSize(), page.getTotalPages(), page.getContent());
+	
+		return pm;
+	}
 }
