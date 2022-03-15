@@ -1,11 +1,18 @@
 package com.network.apispringcourse.service;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -17,7 +24,7 @@ import com.network.apispringcourse.repository.UserRepository;
 import com.network.apispringcourse.util.HashUtil;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService{
 	
 	@Autowired
 	private UserRepository repository;
@@ -70,6 +77,21 @@ public class UserService {
 	
 	public int updateRole(User user) {
 		return repository.updateRole(user.getId(), user.getRole());
+	}
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		Optional<User> result = repository.findByEmail(username);
+		
+		if (!result.isPresent()) {
+			throw new UsernameNotFoundException("Dosen't exist user with email = " + username);
+		}
+		
+		User user = result.get();
+		List<GrantedAuthority> autorities = Arrays.asList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+		org.springframework.security.core.userdetails.User userSpring = new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), autorities);
+		
+		return userSpring;
 	}
 
 }
